@@ -47,6 +47,14 @@ def guess_lang(title, url):
     return "tr" if len(words & TR_WORDS) >= 2 else "en"
 
 
+# akış başlığından yayıncı adı çıkarılamayan alan adları
+SRC_BY_HOST = {
+    "variety.com": "Variety", "deadline.com": "Deadline", "wired.com": "Wired",
+    "indiewire.com": "IndieWire", "beyazperde.com": "Beyazperde", "gdacs.org": "GDACS",
+    "reliefweb.int": "ReliefWeb", "hnrss.org": "Hacker News", "aa.com.tr": "Anadolu Ajansı",
+}
+
+
 def clean_src(s):
     """Kaynak adını kısalt: 'AI | The Verge' -> 'The Verge', 'BBC News - Business' -> 'BBC News'."""
     s = re.sub(r"\s+", " ", s or "").strip().strip('"\u201c\u201d\'')
@@ -72,10 +80,11 @@ def fetch_feed(url):
         r = requests.get(url, headers=UA, timeout=15)
         r.raise_for_status()
         f = feedparser.parse(r.content)
+        host = url.split("/")[2].removeprefix("www.")
         if "news.google.com" in url:
             src = "Google Haber"
         else:
-            src = clean_src(f.feed.get("title") or url.split("/")[2])
+            src = SRC_BY_HOST.get(host) or clean_src(f.feed.get("title") or host)
         return url, src, f.entries
     except Exception as ex:
         print(f"  ! {url}: {ex}")
