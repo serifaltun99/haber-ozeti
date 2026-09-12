@@ -12,7 +12,7 @@ Kişisel haber özet sitesi. Tek kullanıcı (Şerif), Türkçe arayüz, public'
 - Repo private. `public/` gitignore'da (deploy edilir, commit edilmez).
 
 ## Kararlar
-- Token maliyeti öncelikli: API'ye yalnızca başlık gönderilir, tek istek, JSON çıktı, `max_tokens=900`,
+- Token maliyeti öncelikli: API'ye yalnızca başlık gönderilir, tek istek, JSON çıktı, `max_tokens=1800`,
   model `claude-haiku-4-5-20251001`. `USE_AI=0` ile API tamamen kapatılabilir.
 - Arayüz sade olacak: üstte kategori butonları, tek kategori görünür, özet kutusu, ★ önemli haber.
   Dış font/CSS/JS bağımlılığı yok. Karmaşık tasarım istenmiyor.

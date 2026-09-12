@@ -7,8 +7,8 @@ kısa bir Türkçe özet yazdırır, tek sayfalık statik HTML üretir. 6 saatte
 ## Token maliyeti
 
 - Sadece başlıklar gönderilir (makale gövdesi yok), kategori başına en fazla 12 başlık.
-- Tek istek, JSON çıktı, `max_tokens=900`. Çalışma başına ~2.500 giriş + ~700 çıkış token.
-- Haiku 4.5 ile günde 4 çalışma ≈ 0,02 $ / gün.
+- Tek istek, JSON çıktı, `max_tokens=1800`. Çalışma başına ~2.800 giriş + ~1.000 çıkış token.
+- Haiku 4.5 ile günde 4 çalışma ≈ 0,03 $ / gün (~1 $ / ay).
 - `USE_AI=0` ile API tamamen kapatılır; sayfa özetsiz üretilir.
 
 ## Lokal çalıştırma (Windows cmd)

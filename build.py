@@ -88,7 +88,8 @@ def summarize(categories):
         return
     prompt = (
         "Aşağıda kategori başına bugünün haber başlıkları var. Her kategori için:\n"
-        "- ozet: Türkçe, en fazla 2 cümle, sadece en önemli gelişmeyi söyle, başlıkları tekrar etme\n"
+        "- ozet: Türkçe, en fazla 2 cümle ve 200 karakter, sadece en önemli gelişmeyi söyle, "
+        "başlıkları tekrar etme\n"
         "- top: en önemli 3 başlığın numarası\n"
         'Sadece şu JSON\'u döndür, açıklama yazma: {"kategori_key": {"ozet": "...", "top": [1,2,3]}}\n\n'
         + "\n\n".join(blocks)
@@ -103,7 +104,7 @@ def summarize(categories):
             },
             json={
                 "model": MODEL,
-                "max_tokens": 900,
+                "max_tokens": 1800,
                 "messages": [{"role": "user", "content": prompt}],
             },
             timeout=60,
