@@ -14,6 +14,10 @@ Kişisel haber özet sitesi. Tek kullanıcı (Şerif), Türkçe arayüz, public'
 ## Kararlar
 - Token maliyeti öncelikli: API'ye yalnızca başlık gönderilir, iki istek (özet 3000 + çeviri 8000
   token), model `claude-haiku-4-5-20251001`. Çalışma ~0,03 $, ayda ~3 $. `USE_AI=0` API'yi kapatır.
+- Çeviri önbelleği: `cache/` (gitignore'da), anahtar `lang:norm(title)`, en fazla 3000 girdi,
+  workflow'da `actions/cache` ile taşınır (key `ceviri-<run_id>`, restore-key `ceviri-`).
+  Önbellekte olmayan başlık yoksa API'ye hiç istek gitmez.
+- Workflow `paths-ignore: ["**.md"]`: doküman commit'i çalıştırma (ve API maliyeti) üretmez.
 - Çeviri ve özet AYRI isteklerde: tek istekte model İngilizce başlıkları çevirmeden atlıyordu (35/116).
 - Model çeviri metninde kaçırılmamış çift tırnak kullanıp JSON'u bozabiliyor; `salvage()` bozuk
   çıktıdan çiftleri kurtarır. Çeviri yoksa başlık kendi dilinde gösterilir (template'te fallback).

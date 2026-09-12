@@ -10,8 +10,10 @@ Adres: https://serifaltun99.github.io/haber-ozeti/
 
 - Sadece başlıklar gönderilir (makale gövdesi yok), kategori başına en fazla 12 başlık.
 - İki istek: (1) kategori özetleri TR+EN, (2) başlıkların diğer dildeki karşılığı.
-  Çalışma başına ~5.900 giriş + ~4.300 çıkış token.
-- Haiku 4.5 ile günde 4 çalışma ≈ 0,11 $ / gün (~3 $ / ay).
+- Çeviriler `cache/translations.json`'da saklanır ve GitHub Actions cache ile çalıştırmalar
+  arasında taşınır; API'ye yalnızca yeni başlıklar gider. Ölçüm: arka arkaya iki çalıştırmada
+  115 başlığın 112'si önbellekten geldi, çeviri isteği 3.909 → 123 çıkış token'ına düştü.
+- Haiku 4.5 ile günde 4 çalışma ≈ 1,5-2 $ / ay (önbelleksiz ~3 $).
 - `USE_AI=0` ile API tamamen kapatılır; sayfa özetsiz üretilir.
 
 ## Dil

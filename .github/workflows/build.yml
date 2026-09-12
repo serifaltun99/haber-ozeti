@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths-ignore: ["**.md"]   # doküman değişikliği boşuna API isteği atmasın
 concurrency: build
 permissions:
   contents: read
