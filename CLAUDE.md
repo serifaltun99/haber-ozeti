@@ -31,10 +31,18 @@ f1, ligler, turkiye, voleybol
     start public\index.html
 Logda `!` ile başlayan satır = erişilemeyen kaynak; sources.yaml'dan çıkar.
 
+## Canlı kurulum (2026-09-12 itibarıyla tamam)
+- Repo: https://github.com/serifaltun99/haber-ozeti (private), adres: https://haber-ozeti.pages.dev
+- Cloudflare Pages projesi `haber-ozeti` (direct upload; git bağlı DEĞİL, deploy'u Actions yapar).
+  Yeni Cloudflare panelinde Pages sekmesi yok; proje `wrangler pages project create` ile açıldı.
+- Üç secret da GitHub'da tanımlı. Anthropic hesabında kredi var.
+- CI notu: Substack akışlarının bir kısmı (importai, garymarcus, thezvi) GitHub runner IP'lerinden
+  403 veriyor; tarayıcı UA'sı çözmüyor. Substack dışı bloglar tercih edilmeli.
+
 ## Açık işler
-- Gerçek veriyle ilk çalıştırma; kırık RSS kaynaklarını ayıkla.
-- "Öne çıkan isimler" listesini Şerif'in takip etmek istediği kişilerle doldur (Bluesky: `https://bsky.app/profile/HANDLE/rss`).
-- Cloudflare Pages projesi + secret'lar + ilk push (README'de adımlar).
+- "Öne çıkan isimler" listesini Şerif'in takip etmek istediği kişilerle doldur (Bluesky:
+  `https://bsky.app/profile/HANDLE/rss`). Şu an geçici liste: Mollick, Willison, ACX, Karpathy,
+  Altman, Ben Evans, Marginal Revolution, LessWrong.
 - İsteğe bağlı: Cloudflare Access ile sayfayı e-posta OTP arkasına al.
 
 ## Çalışma tarzı
