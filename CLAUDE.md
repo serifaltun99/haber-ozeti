@@ -43,7 +43,8 @@ Logda `!` ile başlayan satır = erişilemeyen kaynak; sources.yaml'dan çıkar.
 - "Öne çıkan isimler" listesini Şerif'in takip etmek istediği kişilerle doldur (Bluesky:
   `https://bsky.app/profile/HANDLE/rss`). Şu an geçici liste: Mollick, Willison, ACX, Karpathy,
   Altman, Ben Evans, Marginal Revolution, LessWrong.
-- İsteğe bağlı: Cloudflare Access ile sayfayı e-posta OTP arkasına al.
+- Cloudflare Access ile kilitleme DÜŞÜNÜLDÜ, YAPILMAYACAK: sayfada gizli bilgi yok, sadece
+  herkese açık haber başlıkları. Adres noindex, arama motorlarına düşmüyor.
 
 ## Çalışma tarzı
 Türkçe yanıt, kısa ve doğrudan, minimal hedefli değişiklik, Windows cmd uyumlu komutlar.
