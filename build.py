@@ -9,7 +9,11 @@ MAX_PER_CAT = int(os.getenv("MAX_PER_CAT", "12"))
 USE_AI = os.getenv("USE_AI", "1") == "1" and bool(os.getenv("ANTHROPIC_API_KEY"))
 MODEL = os.getenv("AI_MODEL", "claude-haiku-4-5-20251001")
 TZ = dt.timezone(dt.timedelta(hours=3))  # Türkiye
-UA = {"User-Agent": "Mozilla/5.0 (compatible; haber-ozeti/1.0)"}
+UA = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/128.0 Safari/537.36",
+    "Accept": "application/rss+xml, application/atom+xml, application/xml;q=0.9, */*;q=0.8",
+}
 
 
 def entry_time(e):
@@ -104,7 +108,9 @@ def summarize(categories):
             },
             timeout=60,
         )
-        r.raise_for_status()
+        if r.status_code != 200:
+            print(f"  ! ai http {r.status_code}: {r.text[:300]}")
+            return
         data = r.json()
         u = data.get("usage", {})
         print(f"  ai tokens: in={u.get('input_tokens')} out={u.get('output_tokens')}")
