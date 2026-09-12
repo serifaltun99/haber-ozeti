@@ -4,62 +4,203 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f0f0f">
 <title>Gündem · {{ generated }}</title>
 <style>
-  body { margin: 0; background: #fff; color: #222;
-         font: 16px/1.5 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
-  .wrap { max-width: 680px; margin: 0 auto; padding: 16px; }
-  h1 { font-size: 22px; margin: 0; }
-  .meta { color: #777; font-size: 13px; margin: 2px 0 16px; }
-  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-  .tabs button { border: 1px solid #ccc; background: #f6f6f6; color: #333; border-radius: 20px;
-                 padding: 8px 14px; font-size: 14px; cursor: pointer; }
-  .tabs button.on { background: #1a73e8; border-color: #1a73e8; color: #fff; }
+  :root {
+    --bg: #f2f2f2;
+    --panel: #ffffff;
+    --ink: #16181a;
+    --ink-soft: #5c6165;
+    --line: #e0e2e4;
+    --accent: #bb1919;
+    --accent-soft: #fdf0f0;
+    --head: #0f0f0f;
+    --head-ink: #ffffff;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 4px 14px rgba(0,0,0,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121417;
+      --panel: #1b1e22;
+      --ink: #eceef0;
+      --ink-soft: #9aa1a8;
+      --line: #2b3036;
+      --accent: #f04747;
+      --accent-soft: #2a1c1e;
+      --head: #000000;
+      --head-ink: #ffffff;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+
+  /* üst bant */
+  .masthead { background: var(--head); color: var(--head-ink); border-bottom: 4px solid var(--accent); }
+  .masthead .wrap { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding: 16px 20px; }
+  .brand { font-size: 26px; font-weight: 800; letter-spacing: -.5px; margin: 0; }
+  .brand span { color: var(--accent); }
+  .stamp { color: #b9bdc2; font-size: 13px; }
+
+  /* kategori şeridi */
+  .nav { position: sticky; top: 0; z-index: 10; background: var(--panel);
+         border-bottom: 1px solid var(--line); box-shadow: var(--shadow); }
+  .nav .wrap { display: flex; gap: 2px; overflow-x: auto; padding: 0 12px;
+               scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .nav .wrap::-webkit-scrollbar { display: none; }
+  .nav button {
+    flex: 0 0 auto; border: 0; background: none; color: var(--ink-soft);
+    font: inherit; font-weight: 600; font-size: 15px; cursor: pointer;
+    padding: 14px 14px 11px; border-bottom: 3px solid transparent; white-space: nowrap;
+  }
+  .nav button:hover { color: var(--ink); background: var(--accent-soft); }
+  .nav button.on { color: var(--ink); border-bottom-color: var(--accent); }
+
+  .wrap { max-width: 1040px; margin: 0 auto; }
+  main { padding: 24px 20px 56px; }
   section { display: none; }
   section.on { display: block; }
-  h2 { font-size: 20px; margin: 0 0 12px; }
-  .sum { background: #eef4fd; border-radius: 8px; padding: 12px 14px; margin: 0 0 16px; }
-  .empty { color: #777; }
-  ul { list-style: none; margin: 0; padding: 0; }
-  li { padding: 12px 0; border-bottom: 1px solid #eee; }
-  li a { color: #1a1a1a; text-decoration: none; font-size: 17px; display: block; }
-  li a:hover { text-decoration: underline; }
-  li.top a::before { content: "★ "; color: #e0a800; }
-  .src { color: #777; font-size: 13px; margin-top: 3px; }
+
+  .cat-head { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; }
+  .cat-head h2 { font-size: 26px; letter-spacing: -.4px; margin: 0; }
+  .cat-head .rule { flex: 1; height: 1px; background: var(--line); }
+  .count { color: var(--ink-soft); font-size: 13px; white-space: nowrap; }
+
+  .sum { background: var(--panel); border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+         padding: 14px 18px; margin: 0 0 24px; box-shadow: var(--shadow); }
+  .sum .label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 1.2px;
+                text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+  .sum p { margin: 0; font-size: 16.5px; }
+
+  .lede { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: 14px; margin: 0 0 28px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+          padding: 16px 18px 14px; box-shadow: var(--shadow); transition: transform .12s, border-color .12s; }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .card .tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 1px;
+               text-transform: uppercase; color: #fff; background: var(--accent);
+               padding: 3px 7px; border-radius: 3px; margin-bottom: 9px; }
+  .card a { text-decoration: none; font-weight: 700; font-size: 19px; line-height: 1.3;
+            display: block; letter-spacing: -.3px; }
+  .card:hover a { text-decoration: underline; }
+
+  .list { list-style: none; margin: 0; padding: 0; background: var(--panel);
+          border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; }
+  .list li { padding: 15px 18px; border-bottom: 1px solid var(--line); }
+  .list li:last-child { border-bottom: 0; }
+  .list li:hover { background: var(--accent-soft); }
+  .list a { text-decoration: none; font-size: 17.5px; font-weight: 600; line-height: 1.35; display: block; }
+  .list li:hover a { text-decoration: underline; }
+
+  .meta { color: var(--ink-soft); font-size: 12.5px; margin-top: 6px;
+          display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .meta .src { font-weight: 600; letter-spacing: .2px; text-transform: uppercase; font-size: 11.5px; }
+  .meta .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-soft); opacity: .6; }
+
+  .empty { color: var(--ink-soft); background: var(--panel); border: 1px dashed var(--line);
+           border-radius: 10px; padding: 22px; text-align: center; }
+
+  footer { border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 13px;
+           padding: 18px 20px 40px; }
+
+  @media (max-width: 640px) {
+    .brand { font-size: 22px; }
+    .cat-head h2 { font-size: 22px; }
+    main { padding: 18px 14px 44px; }
+    .nav .wrap { padding: 0 6px; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Gündem</h1>
-  <div class="meta">Güncellendi: {{ generated }} · son {{ window }} saat · ★ önemli</div>
-  <div class="tabs">
+
+<header class="masthead">
+  <div class="wrap">
+    <h1 class="brand">Gündem<span>.</span></h1>
+    <div class="stamp">{{ generated }} · son {{ window }} saat</div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="wrap">
     {% for c in categories %}<button data-t="{{ c.key }}">{{ c.title }}</button>{% endfor %}
   </div>
+</nav>
+
+<main class="wrap">
   {% for c in categories %}
+  {% set tops = c.news | selectattr('top') | list %}
+  {% set rest = c.news | rejectattr('top') | list %}
   <section id="{{ c.key }}">
-    <h2>{{ c.title }}</h2>
-    {% if c.summary %}<p class="sum">{{ c.summary }}</p>{% endif %}
-    {% if not c.news %}<p class="empty">Bu aralıkta haber yok.</p>{% endif %}
-    <ul>
-    {% for it in c.news %}
-      <li{% if it.top %} class="top"{% endif %}>
+    <div class="cat-head">
+      <h2>{{ c.title }}</h2>
+      <div class="rule"></div>
+      <div class="count">{{ c.news|length }} haber</div>
+    </div>
+
+    {% if c.summary %}
+    <div class="sum">
+      <span class="label">Özet</span>
+      <p>{{ c.summary }}</p>
+    </div>
+    {% endif %}
+
+    {% if tops %}
+    <div class="lede">
+      {% for it in tops %}
+      <article class="card">
+        <span class="tag">Öne çıkan</span>
         <a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a>
-        <div class="src">{{ it.src }} · {{ it.time|dm }} {{ it.time|hm }}</div>
+        <div class="meta"><span class="src">{{ it.src }}</span><i class="dot"></i>{{ it.time|dm }} {{ it.time|hm }}</div>
+      </article>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if rest %}
+    <ul class="list">
+      {% for it in rest %}
+      <li>
+        <a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a>
+        <div class="meta"><span class="src">{{ it.src }}</span><i class="dot"></i>{{ it.time|dm }} {{ it.time|hm }}</div>
       </li>
-    {% endfor %}
+      {% endfor %}
     </ul>
+    {% endif %}
+
+    {% if not c.news %}<p class="empty">Bu aralıkta haber yok.</p>{% endif %}
   </section>
   {% endfor %}
-</div>
+</main>
+
+<footer class="wrap">
+  {% if ai %}Özetler Claude ile üretildi, hata payı olabilir — başlığa tıklayıp kaynağa git.{% else %}Özetler kapalı.{% endif %}
+</footer>
+
 <script>
-  const btns = document.querySelectorAll('.tabs button');
+  const btns = document.querySelectorAll('.nav button');
+  function remember(k) { try { localStorage.setItem('kategori', k); } catch (e) {} }
   function show(k) {
     document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === k));
-    btns.forEach(b => b.classList.toggle('on', b.dataset.t === k));
-    history.replaceState(null, '', '#' + k);
+    btns.forEach(b => {
+      const on = b.dataset.t === k;
+      b.classList.toggle('on', on);
+      if (on) { const strip = b.parentElement; strip.scrollLeft = Math.max(0, b.offsetLeft - 12); }
+    });
+    remember(k);
   }
+  function saved() { try { return localStorage.getItem('kategori'); } catch (e) { return null; } }
+  const keys = [...btns].map(b => b.dataset.t);
+  const wanted = location.hash.slice(1) || saved();
+  show(keys.includes(wanted) ? wanted : keys[0]);
   btns.forEach(b => b.onclick = () => show(b.dataset.t));
-  show(location.hash.slice(1) || btns[0].dataset.t);
+  // adreste # varsa tarayıcı sayfayı aşağı kaydırıyor, başlığı geri getir
+  addEventListener('load', () => scrollTo(0, 0));
 </script>
 </body>
 </html>

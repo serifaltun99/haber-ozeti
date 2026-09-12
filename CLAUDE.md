@@ -13,8 +13,12 @@ Kişisel haber özet sitesi. Tek kullanıcı (Şerif), Türkçe arayüz, public'
 ## Kararlar
 - Token maliyeti öncelikli: API'ye yalnızca başlık gönderilir, tek istek, JSON çıktı, `max_tokens=1800`,
   model `claude-haiku-4-5-20251001`. `USE_AI=0` ile API tamamen kapatılabilir.
-- Arayüz sade olacak: üstte kategori butonları, tek kategori görünür, özet kutusu, ★ önemli haber.
-  Dış font/CSS/JS bağımlılığı yok. Karmaşık tasarım istenmiyor.
+- Arayüz haber sitesi görünümünde (BBC benzeri): siyah üst bant + kırmızı vurgu, yapışkan kategori
+  şeridi (alt çizgili aktif sekme), "Öne çıkan" haberler kart ızgarasında, gerisi liste. Koyu tema
+  `prefers-color-scheme` ile. Dış font/CSS/JS bağımlılığı YOK, her şey template.html içinde.
+- Kategori seçimi `localStorage`'da tutulur. URL'e `#kategori` YAZILMAZ: tarayıcı o bölüme atlayıp
+  sayfayı ~140px kaydırıyor ve üst bant görünmüyordu. Gelen `#kategori` linki okunur, sonra
+  `load`'da `scrollTo(0,0)` ile üste dönülür.
 - Federasyon siteleri RSS vermediği için voleybol ve Türkiye takımları Google News RSS ile:
   `https://news.google.com/rss/search?q=ARAMA&hl=tr&gl=TR&ceid=TR:tr`
 - Jinja'da `c.items` dict metoduyla çakıştığı için haber listesi `c.news` anahtarında.
