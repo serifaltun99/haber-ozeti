@@ -1,7 +1,14 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" data-lang="tr">
 <head>
 <meta charset="utf-8">
+<script>
+  // dil seçimini boyamadan önce uygula (yanıp sönmesin)
+  try {
+    var l = localStorage.getItem('dil');
+    if (l === 'en' || l === 'tr') { document.documentElement.dataset.lang = l; document.documentElement.lang = l; }
+  } catch (e) {}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0f0f0f">
@@ -41,12 +48,24 @@
   }
   a { color: inherit; }
 
+  /* dil anahtarı: seçili dilin metinleri görünür */
+  html[data-lang="tr"] [data-l="en"] { display: none; }
+  html[data-lang="en"] [data-l="tr"] { display: none; }
+
   /* üst bant */
   .masthead { background: var(--head); color: var(--head-ink); border-bottom: 4px solid var(--accent); }
   .masthead .wrap { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; padding: 16px 20px; }
   .brand { font-size: 26px; font-weight: 800; letter-spacing: -.5px; margin: 0; }
-  .brand span { color: var(--accent); }
+  .brand .pt { color: var(--accent); }
   .stamp { color: #b9bdc2; font-size: 13px; }
+  .lang { margin-left: auto; display: flex; border: 1px solid #40454a; border-radius: 6px; overflow: hidden; }
+  .lang button {
+    border: 0; background: none; color: #b9bdc2; font: inherit; font-size: 12px; font-weight: 700;
+    letter-spacing: .5px; padding: 6px 11px; cursor: pointer;
+  }
+  .lang button + button { border-left: 1px solid #40454a; }
+  .lang button:hover { color: #fff; }
+  .lang button.on { background: var(--accent); color: #fff; }
 
   /* kategori şeridi */
   .nav { position: sticky; top: 0; z-index: 10; background: var(--panel);
@@ -121,14 +140,20 @@
 
 <header class="masthead">
   <div class="wrap">
-    <h1 class="brand">Gündem<span>.</span></h1>
-    <div class="stamp">{{ generated }} · son {{ window }} saat</div>
+    <h1 class="brand"><span data-l="tr">Gündem</span><span data-l="en">Today</span><span class="pt">.</span></h1>
+    <div class="stamp">
+      {{ generated }} ·
+      <span data-l="tr">son {{ window }} saat</span><span data-l="en">last {{ window }} hours</span>
+    </div>
+    <div class="lang">
+      <button data-lang="tr">TR</button><button data-lang="en">EN</button>
+    </div>
   </div>
 </header>
 
 <nav class="nav">
   <div class="wrap">
-    {% for c in categories %}<button data-t="{{ c.key }}">{{ c.title }}</button>{% endfor %}
+    {% for c in categories %}<button data-t="{{ c.key }}"><span data-l="tr">{{ c.title }}</span><span data-l="en">{{ c.title_en or c.title }}</span></button>{% endfor %}
   </div>
 </nav>
 
@@ -138,15 +163,15 @@
   {% set rest = c.news | rejectattr('top') | list %}
   <section id="{{ c.key }}">
     <div class="cat-head">
-      <h2>{{ c.title }}</h2>
+      <h2><span data-l="tr">{{ c.title }}</span><span data-l="en">{{ c.title_en or c.title }}</span></h2>
       <div class="rule"></div>
-      <div class="count">{{ c.news|length }} haber</div>
+      <div class="count">{{ c.news|length }} <span data-l="tr">haber</span><span data-l="en">stories</span></div>
     </div>
 
-    {% if c.summary %}
+    {% if c.summary_tr or c.summary_en %}
     <div class="sum">
-      <span class="label">Özet</span>
-      <p>{{ c.summary }}</p>
+      <span class="label"><span data-l="tr">Özet</span><span data-l="en">Summary</span></span>
+      <p><span data-l="tr">{{ c.summary_tr }}</span><span data-l="en">{{ c.summary_en or c.summary_tr }}</span></p>
     </div>
     {% endif %}
 
@@ -154,8 +179,8 @@
     <div class="lede">
       {% for it in tops %}
       <article class="card">
-        <span class="tag">Öne çıkan</span>
-        <a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a>
+        <span class="tag"><span data-l="tr">Öne çıkan</span><span data-l="en">Top story</span></span>
+        <a href="{{ it.link }}" target="_blank" rel="noopener"><span data-l="tr">{{ it.title_tr }}</span><span data-l="en">{{ it.title_en }}</span></a>
         <div class="meta"><span class="src">{{ it.src }}</span><i class="dot"></i>{{ it.time|dm }} {{ it.time|hm }}</div>
       </article>
       {% endfor %}
@@ -166,25 +191,43 @@
     <ul class="list">
       {% for it in rest %}
       <li>
-        <a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a>
+        <a href="{{ it.link }}" target="_blank" rel="noopener"><span data-l="tr">{{ it.title_tr }}</span><span data-l="en">{{ it.title_en }}</span></a>
         <div class="meta"><span class="src">{{ it.src }}</span><i class="dot"></i>{{ it.time|dm }} {{ it.time|hm }}</div>
       </li>
       {% endfor %}
     </ul>
     {% endif %}
 
-    {% if not c.news %}<p class="empty">Bu aralıkta haber yok.</p>{% endif %}
+    {% if not c.news %}
+    <p class="empty"><span data-l="tr">Bu aralıkta haber yok.</span><span data-l="en">No stories in this window.</span></p>
+    {% endif %}
   </section>
   {% endfor %}
 </main>
 
 <footer class="wrap">
-  {% if ai %}Özetler Claude ile üretildi, hata payı olabilir — başlığa tıklayıp kaynağa git.{% else %}Özetler kapalı.{% endif %}
+  {% if ai %}
+  <span data-l="tr">Özetler ve çeviriler Claude ile üretildi, hata payı olabilir — başlığa tıklayıp kaynağa git.</span>
+  <span data-l="en">Summaries and translations are produced by Claude and may contain errors — tap a headline for the source.</span>
+  {% else %}
+  <span data-l="tr">Özetler kapalı.</span><span data-l="en">Summaries are off.</span>
+  {% endif %}
 </footer>
 
 <script>
   const btns = document.querySelectorAll('.nav button');
-  function remember(k) { try { localStorage.setItem('kategori', k); } catch (e) {} }
+  const langBtns = document.querySelectorAll('.lang button');
+
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function read(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  function setLang(l) {
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    langBtns.forEach(b => b.classList.toggle('on', b.dataset.lang === l));
+    store('dil', l);
+  }
+
   function show(k) {
     document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === k));
     btns.forEach(b => {
@@ -192,13 +235,16 @@
       b.classList.toggle('on', on);
       if (on) { const strip = b.parentElement; strip.scrollLeft = Math.max(0, b.offsetLeft - strip.offsetLeft - 12); }
     });
-    remember(k);
+    store('kategori', k);
   }
-  function saved() { try { return localStorage.getItem('kategori'); } catch (e) { return null; } }
-  const keys = [...btns].map(b => b.dataset.t);
-  const wanted = location.hash.slice(1) || saved();
-  show(keys.includes(wanted) ? wanted : keys[0]);
+
+  langBtns.forEach(b => b.onclick = () => setLang(b.dataset.lang));
   btns.forEach(b => b.onclick = () => show(b.dataset.t));
+
+  setLang(document.documentElement.dataset.lang === 'en' ? 'en' : 'tr');
+  const keys = [...btns].map(b => b.dataset.t);
+  const wanted = location.hash.slice(1) || read('kategori');
+  show(keys.includes(wanted) ? wanted : keys[0]);
   // adreste # varsa tarayıcı sayfayı aşağı kaydırıyor, başlığı geri getir
   addEventListener('load', () => scrollTo(0, 0));
 </script>

@@ -27,6 +27,24 @@ def norm(title):
     return re.sub(r"[^a-z0-9çğıöşü]", "", title.lower())[:70]
 
 
+TR_CHARS = re.compile(r"[ğışçöüĞİŞÇÖÜ]")
+TR_WORDS = {
+    "ve", "ile", "için", "bir", "bu", "da", "de", "mi", "ne", "en", "çok", "son", "yeni", "oldu",
+    "olan", "dedi", "sonra", "karşı", "kadar", "göre", "dair", "arasında", "milli", "takım", "maç",
+    "lig", "yılında", "türkiye", "bakan", "başkan", "açıklama", "deprem", "yangın", "sel", "haber",
+}
+
+
+def guess_lang(title, url):
+    """Başlığın dili: Türkçe kaynak/karakter/kelime varsa tr, yoksa en."""
+    if "hl=tr" in url or ".tr/" in url or url.endswith(".tr"):
+        return "tr"
+    if TR_CHARS.search(title):
+        return "tr"
+    words = set(re.findall(r"[a-zçğıöşü]+", title.lower()))
+    return "tr" if len(words & TR_WORDS) >= 2 else "en"
+
+
 def clean_src(s):
     """Kaynak adını kısalt: 'AI | The Verge' -> 'The Verge', 'BBC News - Business' -> 'BBC News'."""
     s = re.sub(r"\s+", " ", s or "").strip().strip('"\u201c\u201d\'')
@@ -88,7 +106,9 @@ def collect(categories):
                 if "news.google.com" in url and " - " in title:
                     title, s = title.rsplit(" - ", 1)
                     s = clean_src(s)
-                items.append({"title": title, "link": link, "src": s, "time": t})
+                lang = guess_lang(title, url)
+                items.append({"title": title, "link": link, "src": s, "time": t,
+                              "lang": lang, "title_tr": title, "title_en": title})
         items.sort(key=lambda x: x["time"], reverse=True)
         c["news"] = items[:MAX_PER_CAT]
         print(f"  {c['key']}: {len(c['news'])}")
@@ -96,21 +116,29 @@ def collect(categories):
 
 
 def summarize(categories):
-    """Tek istek. Sadece başlık gönderilir, JSON döner."""
+    """Tek istek: kategori özetleri (TR+EN), öne çıkan haberler ve başlıkların diğer dildeki karşılığı."""
+    items = [it for c in categories for it in c["news"]]
+    if not items:
+        return
+    for i, it in enumerate(items, 1):
+        it["id"] = i
     blocks = []
     for c in categories:
         if not c["news"]:
             continue
-        lines = "\n".join(f"{i+1}. {it['title']}" for i, it in enumerate(c["news"]))
+        lines = "\n".join(f"{it['id']} [{it['lang']}] {it['title']}" for it in c["news"])
         blocks.append(f"## {c['key']}\n{lines}")
-    if not blocks:
-        return
     prompt = (
-        "Aşağıda kategori başına bugünün haber başlıkları var. Her kategori için:\n"
-        "- ozet: Türkçe, en fazla 2 cümle ve 200 karakter, sadece en önemli gelişmeyi söyle, "
+        "Aşağıda kategori kategori bugünün haber başlıkları var; her satırda başlığın numarası ve "
+        "dili yazıyor. Şu JSON'u döndür, başka hiçbir şey yazma:\n"
+        '{"kategoriler": {"<kategori_key>": {"ozet_tr": "...", "ozet_en": "...", "top": [num, num, num]}}, '
+        '"ceviri": {"<numara>": "..."}}\n'
+        "- ozet_tr: Türkçe, en fazla 2 cümle ve 200 karakter, sadece en önemli gelişme, "
         "başlıkları tekrar etme\n"
-        "- top: en önemli 3 başlığın numarası\n"
-        'Sadece şu JSON\'u döndür, açıklama yazma: {"kategori_key": {"ozet": "...", "top": [1,2,3]}}\n\n'
+        "- ozet_en: aynı özetin İngilizcesi\n"
+        "- top: o kategorideki en önemli 3 başlığın numarası\n"
+        "- ceviri: HER başlık için bir satır. [tr] işaretli başlığın İngilizcesini, [en] işaretli "
+        "başlığın Türkçesini yaz. Sadece çeviri metni, numarayı tekrar etme.\n\n"
         + "\n\n".join(blocks)
     )
     try:
@@ -123,10 +151,10 @@ def summarize(categories):
             },
             json={
                 "model": MODEL,
-                "max_tokens": 1800,
+                "max_tokens": 8000,
                 "messages": [{"role": "user", "content": prompt}],
             },
-            timeout=60,
+            timeout=120,
         )
         if r.status_code != 200:
             print(f"  ! ai http {r.status_code}: {r.text[:300]}")
@@ -140,12 +168,25 @@ def summarize(categories):
     except Exception as ex:
         print(f"  ! ai: {ex}")
         return
+
+    cats = out.get("kategoriler") or {}
     for c in categories:
-        d = out.get(c["key"]) or {}
-        c["summary"] = d.get("ozet", "")
-        for n in d.get("top", []):
-            if isinstance(n, int) and 1 <= n <= len(c["news"]):
-                c["news"][n - 1]["top"] = True
+        d = cats.get(c["key"]) or {}
+        c["summary_tr"] = d.get("ozet_tr", "")
+        c["summary_en"] = d.get("ozet_en", "")
+        tops = {n for n in d.get("top", []) if isinstance(n, int)}
+        for it in c["news"]:
+            if it["id"] in tops:
+                it["top"] = True
+
+    cev = out.get("ceviri") or {}
+    çevrilen = 0
+    for it in items:
+        t = cev.get(str(it["id"]))
+        if isinstance(t, str) and t.strip():
+            it["title_en" if it["lang"] == "tr" else "title_tr"] = clean_title(t)
+            çevrilen += 1
+    print(f"  çeviri: {çevrilen}/{len(items)}")
 
 
 def render(categories):

@@ -6,6 +6,7 @@
 categories:
   - key: ai
     title: Yapay zeka
+    title_en: Artificial intelligence
     feeds:
       - https://techcrunch.com/category/artificial-intelligence/feed/
       - https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
@@ -15,6 +16,7 @@ categories:
 
   - key: ekonomi
     title: Ekonomi
+    title_en: Economy
     feeds:
       - https://feeds.bbci.co.uk/news/business/rss.xml
       - https://www.cnbc.com/id/20910258/device/rss/rss.html
@@ -23,6 +25,7 @@ categories:
 
   - key: afet
     title: Doğal afetler
+    title_en: Natural disasters
     feeds:
       - https://www.gdacs.org/xml/rss.xml
       - https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/5.0_day.atom
@@ -31,6 +34,7 @@ categories:
 
   - key: dunya
     title: Siyaset ve savaş
+    title_en: Politics & war
     feeds:
       - https://feeds.bbci.co.uk/news/world/rss.xml
       - https://www.aljazeera.com/xml/rss/all.xml
@@ -39,6 +43,7 @@ categories:
 
   - key: teknoloji
     title: Teknoloji
+    title_en: Technology
     feeds:
       - https://techcrunch.com/feed/
       - https://www.theverge.com/rss/index.xml
@@ -47,6 +52,7 @@ categories:
 
   - key: yorum
     title: Öne çıkan isimler
+    title_en: Voices
     # Kişi/blog akışları. Bluesky için: https://bsky.app/profile/HANDLE/rss
     feeds:
       - https://www.oneusefulthing.org/feed
@@ -60,6 +66,7 @@ categories:
 
   - key: f1
     title: Formula 1
+    title_en: Formula 1
     feeds:
       - https://www.formula1.com/en/latest/all.xml
       - https://www.autosport.com/rss/f1/news/
@@ -67,6 +74,7 @@ categories:
 
   - key: ligler
     title: Avrupa ligleri
+    title_en: European leagues
     feeds:
       - https://feeds.bbci.co.uk/sport/football/rss.xml
       - https://www.theguardian.com/football/rss
@@ -74,6 +82,7 @@ categories:
 
   - key: turkiye
     title: Türkiye takımları
+    title_en: Turkish clubs
     feeds:
       - https://www.aa.com.tr/tr/rss/default?cat=spor
       - https://news.google.com/rss/search?q=Galatasaray+OR+Fenerbahçe+OR+Beşiktaş+OR+Trabzonspor&hl=tr&gl=TR&ceid=TR:tr
@@ -81,6 +90,7 @@ categories:
 
   - key: voleybol
     title: Voleybol
+    title_en: Volleyball
     feeds:
       - https://news.google.com/rss/search?q=voleybol+kadın+OR+erkek+milli+takım&hl=tr&gl=TR&ceid=TR:tr
       - https://news.google.com/rss/search?q=Sultanlar+Ligi+OR+Efeler+Ligi&hl=tr&gl=TR&ceid=TR:tr
