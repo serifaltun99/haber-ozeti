@@ -1,0 +1,85 @@
+# Kategori sırası sayfadaki sırayı belirler.
+# Çalışmayan bir kaynak logda "!" ile görünür; sil ya da değiştir.
+# Google News RSS kalıbı (her konu için işe yarar):
+#   https://news.google.com/rss/search?q=ARAMA&hl=tr&gl=TR&ceid=TR:tr
+
+categories:
+  - key: ai
+    title: Yapay zeka
+    feeds:
+      - https://techcrunch.com/category/artificial-intelligence/feed/
+      - https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
+      - https://www.technologyreview.com/feed/
+      - https://openai.com/news/rss.xml
+      - https://www.wired.com/feed/tag/ai/latest/rss
+
+  - key: ekonomi
+    title: Ekonomi
+    feeds:
+      - https://feeds.bbci.co.uk/news/business/rss.xml
+      - https://www.cnbc.com/id/20910258/device/rss/rss.html
+      - https://www.aa.com.tr/tr/rss/default?cat=ekonomi
+      - https://www.bloomberght.com/rss
+
+  - key: afet
+    title: Doğal afetler
+    feeds:
+      - https://www.gdacs.org/xml/rss.xml
+      - https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/5.0_day.atom
+      - https://reliefweb.int/updates/rss.xml
+      - https://news.google.com/rss/search?q=deprem+OR+sel+OR+kasırga+OR+yangın+afet&hl=tr&gl=TR&ceid=TR:tr
+
+  - key: dunya
+    title: Siyaset ve savaş
+    feeds:
+      - https://feeds.bbci.co.uk/news/world/rss.xml
+      - https://www.aljazeera.com/xml/rss/all.xml
+      - https://www.theguardian.com/world/rss
+      - https://www.aa.com.tr/tr/rss/default?cat=dunya
+
+  - key: teknoloji
+    title: Teknoloji
+    feeds:
+      - https://techcrunch.com/feed/
+      - https://www.theverge.com/rss/index.xml
+      - https://feeds.arstechnica.com/arstechnica/index
+      - https://hnrss.org/frontpage?points=150
+
+  - key: yorum
+    title: Öne çıkan isimler
+    # Kişi/blog akışları. Bluesky için: https://bsky.app/profile/HANDLE/rss
+    feeds:
+      - https://www.oneusefulthing.org/feed
+      - https://simonwillison.net/atom/everything/
+      - https://importai.substack.com/feed
+      - https://garymarcus.substack.com/feed
+      - https://thezvi.substack.com/feed
+      - https://www.astralcodexten.com/feed
+
+  - key: f1
+    title: Formula 1
+    feeds:
+      - https://www.formula1.com/en/latest/all.xml
+      - https://www.autosport.com/rss/f1/news/
+      - https://feeds.bbci.co.uk/sport/formula1/rss.xml
+
+  - key: ligler
+    title: Avrupa ligleri
+    feeds:
+      - https://feeds.bbci.co.uk/sport/football/rss.xml
+      - https://www.theguardian.com/football/rss
+      - https://www.espn.com/espn/rss/soccer/news
+
+  - key: turkiye
+    title: Türkiye takımları
+    feeds:
+      - https://www.aa.com.tr/tr/rss/default?cat=spor
+      - https://news.google.com/rss/search?q=Galatasaray+OR+Fenerbahçe+OR+Beşiktaş+OR+Trabzonspor&hl=tr&gl=TR&ceid=TR:tr
+      - https://news.google.com/rss/search?q=Süper+Lig&hl=tr&gl=TR&ceid=TR:tr
+
+  - key: voleybol
+    title: Voleybol
+    feeds:
+      - https://news.google.com/rss/search?q=voleybol+kadın+OR+erkek+milli+takım&hl=tr&gl=TR&ceid=TR:tr
+      - https://news.google.com/rss/search?q=Sultanlar+Ligi+OR+Efeler+Ligi&hl=tr&gl=TR&ceid=TR:tr
+      - https://news.google.com/rss/search?q=volleyball+CEV+OR+FIVB&hl=en&gl=US&ceid=US:en

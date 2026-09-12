@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Gündem · {{ generated }}</title>
+<style>
+  body { margin: 0; background: #fff; color: #222;
+         font: 16px/1.5 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 22px; margin: 0; }
+  .meta { color: #777; font-size: 13px; margin: 2px 0 16px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .tabs button { border: 1px solid #ccc; background: #f6f6f6; color: #333; border-radius: 20px;
+                 padding: 8px 14px; font-size: 14px; cursor: pointer; }
+  .tabs button.on { background: #1a73e8; border-color: #1a73e8; color: #fff; }
+  section { display: none; }
+  section.on { display: block; }
+  h2 { font-size: 20px; margin: 0 0 12px; }
+  .sum { background: #eef4fd; border-radius: 8px; padding: 12px 14px; margin: 0 0 16px; }
+  .empty { color: #777; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 12px 0; border-bottom: 1px solid #eee; }
+  li a { color: #1a1a1a; text-decoration: none; font-size: 17px; display: block; }
+  li a:hover { text-decoration: underline; }
+  li.top a::before { content: "★ "; color: #e0a800; }
+  .src { color: #777; font-size: 13px; margin-top: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Gündem</h1>
+  <div class="meta">Güncellendi: {{ generated }} · son {{ window }} saat · ★ önemli</div>
+  <div class="tabs">
+    {% for c in categories %}<button data-t="{{ c.key }}">{{ c.title }}</button>{% endfor %}
+  </div>
+  {% for c in categories %}
+  <section id="{{ c.key }}">
+    <h2>{{ c.title }}</h2>
+    {% if c.summary %}<p class="sum">{{ c.summary }}</p>{% endif %}
+    {% if not c.news %}<p class="empty">Bu aralıkta haber yok.</p>{% endif %}
+    <ul>
+    {% for it in c.news %}
+      <li{% if it.top %} class="top"{% endif %}>
+        <a href="{{ it.link }}" target="_blank" rel="noopener">{{ it.title }}</a>
+        <div class="src">{{ it.src }} · {{ it.time|dm }} {{ it.time|hm }}</div>
+      </li>
+    {% endfor %}
+    </ul>
+  </section>
+  {% endfor %}
+</div>
+<script>
+  const btns = document.querySelectorAll('.tabs button');
+  function show(k) {
+    document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === k));
+    btns.forEach(b => b.classList.toggle('on', b.dataset.t === k));
+    history.replaceState(null, '', '#' + k);
+  }
+  btns.forEach(b => b.onclick = () => show(b.dataset.t));
+  show(location.hash.slice(1) || btns[0].dataset.t);
+</script>
+</body>
+</html>
