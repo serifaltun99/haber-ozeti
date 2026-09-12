@@ -51,10 +51,12 @@ categories:
     feeds:
       - https://www.oneusefulthing.org/feed
       - https://simonwillison.net/atom/everything/
-      - https://importai.substack.com/feed
-      - https://garymarcus.substack.com/feed
-      - https://thezvi.substack.com/feed
       - https://www.astralcodexten.com/feed
+      - https://karpathy.bearblog.dev/feed/?type=rss
+      - https://blog.samaltman.com/posts.atom
+      - https://www.ben-evans.com/benedictevans?format=rss
+      - https://marginalrevolution.com/feed
+      - https://www.lesswrong.com/feed.xml?view=curated-rss
 
   - key: f1
     title: Formula 1
