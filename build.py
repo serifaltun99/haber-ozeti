@@ -27,6 +27,21 @@ def norm(title):
     return re.sub(r"[^a-z0-9çğıöşü]", "", title.lower())[:70]
 
 
+def clean_src(s):
+    """Kaynak adını kısalt: 'AI | The Verge' -> 'The Verge', 'BBC News - Business' -> 'BBC News'."""
+    s = re.sub(r"\s+", " ", s or "").strip().strip('"\u201c\u201d\'')
+    s = re.sub(r"^(Feed|RSS)\s*:\s*", "", s, flags=re.I)
+    if "|" in s:                      # yayıncı adı genelde sonda
+        s = s.split("|")[-1].strip() or s
+    for sep in (" - ", " – ", " — ", " :: ", ": "):
+        if sep in s:                  # "BBC News - Business" gibi: yayıncı başta
+            s = s.split(sep)[0].strip() or s
+            break
+    if len(s) > 26:                   # kelime sınırında kes
+        s = s[:26].rsplit(" ", 1)[0]
+    return s
+
+
 def clean_title(t):
     t = re.sub(r"\s+", " ", t or "").strip()
     return t[:140]
@@ -37,7 +52,10 @@ def fetch_feed(url):
         r = requests.get(url, headers=UA, timeout=15)
         r.raise_for_status()
         f = feedparser.parse(r.content)
-        src = (f.feed.get("title") or url.split("/")[2]).replace(" - Google News", "").strip()[:40]
+        if "news.google.com" in url:
+            src = "Google Haber"
+        else:
+            src = clean_src(f.feed.get("title") or url.split("/")[2])
         return url, src, f.entries
     except Exception as ex:
         print(f"  ! {url}: {ex}")
@@ -69,6 +87,7 @@ def collect(categories):
                 s = src
                 if "news.google.com" in url and " - " in title:
                     title, s = title.rsplit(" - ", 1)
+                    s = clean_src(s)
                 items.append({"title": title, "link": link, "src": s, "time": t})
         items.sort(key=lambda x: x["time"], reverse=True)
         c["news"] = items[:MAX_PER_CAT]
