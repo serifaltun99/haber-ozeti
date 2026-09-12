@@ -115,32 +115,8 @@ def collect(categories):
     return categories
 
 
-def summarize(categories):
-    """Tek istek: kategori özetleri (TR+EN), öne çıkan haberler ve başlıkların diğer dildeki karşılığı."""
-    items = [it for c in categories for it in c["news"]]
-    if not items:
-        return
-    for i, it in enumerate(items, 1):
-        it["id"] = i
-    blocks = []
-    for c in categories:
-        if not c["news"]:
-            continue
-        lines = "\n".join(f"{it['id']} [{it['lang']}] {it['title']}" for it in c["news"])
-        blocks.append(f"## {c['key']}\n{lines}")
-    prompt = (
-        "Aşağıda kategori kategori bugünün haber başlıkları var; her satırda başlığın numarası ve "
-        "dili yazıyor. Şu JSON'u döndür, başka hiçbir şey yazma:\n"
-        '{"kategoriler": {"<kategori_key>": {"ozet_tr": "...", "ozet_en": "...", "top": [num, num, num]}}, '
-        '"ceviri": {"<numara>": "..."}}\n'
-        "- ozet_tr: Türkçe, en fazla 2 cümle ve 200 karakter, sadece en önemli gelişme, "
-        "başlıkları tekrar etme\n"
-        "- ozet_en: aynı özetin İngilizcesi\n"
-        "- top: o kategorideki en önemli 3 başlığın numarası\n"
-        "- ceviri: HER başlık için bir satır. [tr] işaretli başlığın İngilizcesini, [en] işaretli "
-        "başlığın Türkçesini yaz. Sadece çeviri metni, numarayı tekrar etme.\n\n"
-        + "\n\n".join(blocks)
-    )
+def ask(prompt, max_tokens, etiket):
+    """Tek Claude isteği; JSON gövdesini sözlük olarak döndürür, hata olursa None."""
     try:
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
@@ -151,27 +127,49 @@ def summarize(categories):
             },
             json={
                 "model": MODEL,
-                "max_tokens": 8000,
+                "max_tokens": max_tokens,
                 "messages": [{"role": "user", "content": prompt}],
             },
-            timeout=120,
+            timeout=180,
         )
         if r.status_code != 200:
-            print(f"  ! ai http {r.status_code}: {r.text[:300]}")
-            return
+            print(f"  ! {etiket} http {r.status_code}: {r.text[:300]}")
+            return None
         data = r.json()
         u = data.get("usage", {})
-        print(f"  ai tokens: in={u.get('input_tokens')} out={u.get('output_tokens')}")
+        print(f"  {etiket} tokens: in={u.get('input_tokens')} out={u.get('output_tokens')}")
         text = data["content"][0]["text"]
-        text = text[text.find("{"): text.rfind("}") + 1]
-        out = json.loads(text)
+        return json.loads(text[text.find("{"): text.rfind("}") + 1])
     except Exception as ex:
-        print(f"  ! ai: {ex}")
-        return
+        print(f"  ! {etiket}: {ex}")
+        return None
 
-    cats = out.get("kategoriler") or {}
+
+def summarize(categories):
+    """Kategori başına iki dilli özet ve en önemli 3 haber."""
+    blocks = []
     for c in categories:
-        d = cats.get(c["key"]) or {}
+        if not c["news"]:
+            continue
+        lines = "\n".join(f"{it['id']}. {it['title']}" for it in c["news"])
+        blocks.append(f"## {c['key']}\n{lines}")
+    if not blocks:
+        return
+    prompt = (
+        "Aşağıda kategori başına bugünün haber başlıkları var. Her kategori için:\n"
+        "- ozet_tr: Türkçe, en fazla 2 cümle ve 200 karakter, sadece en önemli gelişmeyi söyle, "
+        "başlıkları tekrar etme\n"
+        "- ozet_en: aynı özetin İngilizcesi\n"
+        "- top: en önemli 3 başlığın numarası\n"
+        'Sadece şu JSON\'u döndür, açıklama yazma: '
+        '{"kategori_key": {"ozet_tr": "...", "ozet_en": "...", "top": [1,2,3]}}\n\n'
+        + "\n\n".join(blocks)
+    )
+    out = ask(prompt, 3000, "ozet")
+    if not out:
+        return
+    for c in categories:
+        d = out.get(c["key"]) or {}
         c["summary_tr"] = d.get("ozet_tr", "")
         c["summary_en"] = d.get("ozet_en", "")
         tops = {n for n in d.get("top", []) if isinstance(n, int)}
@@ -179,14 +177,38 @@ def summarize(categories):
             if it["id"] in tops:
                 it["top"] = True
 
-    cev = out.get("ceviri") or {}
-    çevrilen = 0
+
+def translate(items):
+    """Her başlığın diğer dildeki karşılığını üretir: tr -> en, en -> tr."""
+    tr = [it for it in items if it["lang"] == "tr"]
+    en = [it for it in items if it["lang"] == "en"]
+    if not items:
+        return
+    parts = []
+    if tr:
+        parts.append("## Türkçeden İngilizceye çevir\n"
+                     + "\n".join(f"{it['id']}. {it['title']}" for it in tr))
+    if en:
+        parts.append("## İngilizceden Türkçeye çevir\n"
+                     + "\n".join(f"{it['id']}. {it['title']}" for it in en))
+    prompt = (
+        f"Aşağıda numaralı {len(items)} haber başlığı var: {len(tr)} tanesi Türkçe bölümünde, "
+        f"{len(en)} tanesi İngilizce bölümünde. Her başlığı kendi bölümünün yönüne göre çevir.\n"
+        "Haber başlığı üslubunu koru, kısa tut, özel isimleri ve skorları aynen bırak.\n"
+        f'Sadece şu JSON\'u döndür, açıklama yazma: {{"1": "çeviri", "2": "çeviri", ...}}\n'
+        f"{len(items)} numaranın HEPSİ cevapta olmalı, hiçbirini atlama.\n\n"
+        + "\n\n".join(parts)
+    )
+    out = ask(prompt, 8000, "ceviri")
+    if not out:
+        return
+    n = 0
     for it in items:
-        t = cev.get(str(it["id"]))
+        t = out.get(str(it["id"]))
         if isinstance(t, str) and t.strip():
             it["title_en" if it["lang"] == "tr" else "title_tr"] = clean_title(t)
-            çevrilen += 1
-    print(f"  çeviri: {çevrilen}/{len(items)}")
+            n += 1
+    print(f"  çeviri: {n}/{len(items)}")
 
 
 def render(categories):
@@ -209,8 +231,13 @@ if __name__ == "__main__":
         cats = yaml.safe_load(f)["categories"]
     print("fetch")
     collect(cats)
+    items = [it for c in cats for it in c["news"]]
+    for i, it in enumerate(items, 1):
+        it["id"] = i
     if USE_AI:
         print("summarize")
         summarize(cats)
+        print("translate")
+        translate(items)
     render(cats)
     print("ok -> public/index.html")
