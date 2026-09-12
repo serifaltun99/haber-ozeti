@@ -33,13 +33,17 @@ categories:
       - https://news.google.com/rss/search?q=deprem+OR+sel+OR+kasırga+OR+yangın+afet&hl=tr&gl=TR&ceid=TR:tr
 
   - key: dunya
-    title: Siyaset ve savaş
-    title_en: Politics & war
+    title: Siyaset ve gündem
+    title_en: Politics & current affairs
+    # Dünya + Türkiye; akış başına kota olduğu için Google Haber'in 80+ sonucu kategoriyi ezmez
     feeds:
       - https://feeds.bbci.co.uk/news/world/rss.xml
       - https://www.aljazeera.com/xml/rss/all.xml
       - https://www.theguardian.com/world/rss
       - https://www.aa.com.tr/tr/rss/default?cat=dunya
+      - https://feeds.bbci.co.uk/turkce/rss.xml
+      - https://www.aa.com.tr/tr/rss/default?cat=guncel
+      - https://news.google.com/rss/search?q=TBMM+OR+Cumhurbaşkanı+OR+muhalefet+OR+hükümet&hl=tr&gl=TR&ceid=TR:tr
 
   - key: teknoloji
     title: Teknoloji

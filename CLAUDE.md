@@ -31,10 +31,14 @@ Kişisel haber özet sitesi. Tek kullanıcı (Şerif), Türkçe arayüz, public'
   `load`'da `scrollTo(0,0)` ile üste dönülür.
 - Federasyon siteleri RSS vermediği için voleybol ve Türkiye takımları Google News RSS ile:
   `https://news.google.com/rss/search?q=ARAMA&hl=tr&gl=TR&ceid=TR:tr`
+- Kategori içinde akış başına kota: `ceil(MAX_PER_CAT / akış sayısı)` (en az 2). Önce her akıştan
+  kota kadar en yeni haber, sonra kalanlarla 12'ye tamamlanır. Google Haber gibi günde 80+ sonuç
+  veren akışlar diğerlerini ezmesin diye. AA `cat=politika` akışı güncellenmiyor (Nisan'da kalmış).
 - Jinja'da `c.items` dict metoduyla çakıştığı için haber listesi `c.news` anahtarında.
 
 ## Kategoriler (sources.yaml sırası)
-ai, ekonomi, afet, dunya, teknoloji, yorum (bilim insanları/öne çıkan isimlerin blog-Substack akışları), sinema,
+ai, ekonomi, afet, dunya (dünya + Türkiye siyaseti/gündemi), teknoloji, yorum (bilim insanları/öne çıkan
+isimlerin blog-Substack akışları), sinema,
 f1, ligler, turkiye, voleybol
 
 ## Lokal çalıştırma (Windows cmd)

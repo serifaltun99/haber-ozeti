@@ -99,8 +99,9 @@ def collect(categories):
 
     seen = set()
     for c in categories:
-        items = []
+        per_feed = {}  # akış -> haberleri; tek akış kategoriyi ezmesin diye kota uygulanır
         for url in c["feeds"]:
+            items = per_feed.setdefault(url, [])
             src, entries = results[url]
             for e in entries:
                 t = entry_time(e)
@@ -120,8 +121,18 @@ def collect(categories):
                 lang = guess_lang(title, url)
                 items.append({"title": title, "link": link, "src": s, "time": t,
                               "lang": lang, "title_tr": title, "title_en": title})
-        items.sort(key=lambda x: x["time"], reverse=True)
-        c["news"] = items[:MAX_PER_CAT]
+        # 1. tur: her akıştan en fazla kota kadar (en yeniler); 2. tur: kalanlarla doldur
+        quota = max(2, -(-MAX_PER_CAT // len(c["feeds"])))
+        first, rest = [], []
+        for lst in per_feed.values():
+            lst.sort(key=lambda x: x["time"], reverse=True)
+            first += lst[:quota]
+            rest += lst[quota:]
+        first.sort(key=lambda x: x["time"], reverse=True)
+        rest.sort(key=lambda x: x["time"], reverse=True)
+        chosen = (first[:MAX_PER_CAT] + rest)[:MAX_PER_CAT]
+        chosen.sort(key=lambda x: x["time"], reverse=True)
+        c["news"] = chosen
         print(f"  {c['key']}: {len(c['news'])}")
     return categories
 
