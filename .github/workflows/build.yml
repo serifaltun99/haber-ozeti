@@ -23,6 +23,12 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -r requirements.txt
+      # çeviriler çalıştırmalar arasında saklansın: sadece yeni başlıklar API'ye gitsin
+      - uses: actions/cache@v4
+        with:
+          path: cache
+          key: ceviri-${{ github.run_id }}
+          restore-keys: ceviri-
       - run: python build.py
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

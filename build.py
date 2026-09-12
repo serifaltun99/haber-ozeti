@@ -9,6 +9,8 @@ MAX_PER_CAT = int(os.getenv("MAX_PER_CAT", "12"))
 USE_AI = os.getenv("USE_AI", "1") == "1" and bool(os.getenv("ANTHROPIC_API_KEY"))
 MODEL = os.getenv("AI_MODEL", "claude-haiku-4-5-20251001")
 TZ = dt.timezone(dt.timedelta(hours=3))  # Türkiye
+CACHE = os.path.join(ROOT, "cache", "translations.json")
+CACHE_MAX = 3000  # kaç çeviri saklansın
 UA = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/128.0 Safari/537.36",
@@ -196,12 +198,46 @@ def summarize(categories):
                 it["top"] = True
 
 
+def cache_load():
+    try:
+        with open(CACHE, encoding="utf-8") as f:
+            d = json.load(f)
+            return d if isinstance(d, dict) else {}
+    except Exception:
+        return {}
+
+
+def cache_save(d):
+    if len(d) > CACHE_MAX:  # en eski girdileri at (dict ekleme sırasını korur)
+        d = dict(list(d.items())[-CACHE_MAX:])
+    os.makedirs(os.path.dirname(CACHE), exist_ok=True)
+    with open(CACHE, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False)
+
+
 def translate(items):
-    """Her başlığın diğer dildeki karşılığını üretir: tr -> en, en -> tr."""
-    tr = [it for it in items if it["lang"] == "tr"]
-    en = [it for it in items if it["lang"] == "en"]
+    """Her başlığın diğer dildeki karşılığı: tr -> en, en -> tr. Önce önbellek, kalanı API."""
     if not items:
         return
+    cache = cache_load()
+    kalan = []
+    isabet = 0
+    for it in items:
+        it["ckey"] = f"{it['lang']}:{norm(it['title'])}"
+        t = cache.pop(it["ckey"], None)          # tekrar ekleyince taze sayılır
+        if isinstance(t, str) and t.strip():
+            it["title_en" if it["lang"] == "tr" else "title_tr"] = t
+            cache[it["ckey"]] = t
+            isabet += 1
+        else:
+            kalan.append(it)
+    print(f"  önbellek: {isabet} isabet, {len(kalan)} yeni")
+    if not kalan:
+        cache_save(cache)
+        return
+
+    tr = [it for it in kalan if it["lang"] == "tr"]
+    en = [it for it in kalan if it["lang"] == "en"]
     parts = []
     if tr:
         parts.append("## Türkçeden İngilizceye çevir\n"
@@ -210,24 +246,28 @@ def translate(items):
         parts.append("## İngilizceden Türkçeye çevir\n"
                      + "\n".join(f"{it['id']}. {it['title']}" for it in en))
     prompt = (
-        f"Aşağıda numaralı {len(items)} haber başlığı var: {len(tr)} tanesi Türkçe bölümünde, "
+        f"Aşağıda numaralı {len(kalan)} haber başlığı var: {len(tr)} tanesi Türkçe bölümünde, "
         f"{len(en)} tanesi İngilizce bölümünde. Her başlığı kendi bölümünün yönüne göre çevir.\n"
         "Haber başlığı üslubunu koru, kısa tut, özel isimleri ve skorları aynen bırak.\n"
         "Çeviri metninde çift tırnak (\") KULLANMA, gerekiyorsa tek tırnak kullan.\n"
         f'Sadece şu JSON\'u döndür, açıklama yazma: {{"1": "çeviri", "2": "çeviri", ...}}\n'
-        f"{len(items)} numaranın HEPSİ cevapta olmalı, hiçbirini atlama.\n\n"
+        f"{len(kalan)} numaranın HEPSİ cevapta olmalı, hiçbirini atlama.\n\n"
         + "\n\n".join(parts)
     )
     out = ask(prompt, 8000, "ceviri", kurtar=True)
     if not out:
+        cache_save(cache)
         return
     n = 0
-    for it in items:
+    for it in kalan:
         t = out.get(str(it["id"]))
         if isinstance(t, str) and t.strip():
-            it["title_en" if it["lang"] == "tr" else "title_tr"] = clean_title(t)
+            t = clean_title(t)
+            it["title_en" if it["lang"] == "tr" else "title_tr"] = t
+            cache[it["ckey"]] = t
             n += 1
-    print(f"  çeviri: {n}/{len(items)}")
+    print(f"  çeviri: {n}/{len(kalan)} yeni başlık (toplam {isabet + n}/{len(items)})")
+    cache_save(cache)
 
 
 def render(categories):
