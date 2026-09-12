@@ -115,7 +115,20 @@ def collect(categories):
     return categories
 
 
-def ask(prompt, max_tokens, etiket):
+def salvage(text):
+    """Kaçırılmamış tırnak yüzünden bozulan {"12": "..."} JSON'undan çiftleri kurtarır."""
+    out = {}
+    keys = list(re.finditer(r'"(\d+)"\s*:\s*"', text))
+    for i, m in enumerate(keys):
+        chunk = text[m.end(): keys[i + 1].start() if i + 1 < len(keys) else len(text)]
+        j = chunk.rfind('"')
+        if j > 0:
+            out[m.group(1)] = chunk[:j].replace('\\"', '"').strip()
+    print(f"  kurtarilan: {len(out)}")
+    return out
+
+
+def ask(prompt, max_tokens, etiket, kurtar=False):
     """Tek Claude isteği; JSON gövdesini sözlük olarak döndürür, hata olursa None."""
     try:
         r = requests.post(
@@ -139,7 +152,12 @@ def ask(prompt, max_tokens, etiket):
         u = data.get("usage", {})
         print(f"  {etiket} tokens: in={u.get('input_tokens')} out={u.get('output_tokens')}")
         text = data["content"][0]["text"]
-        return json.loads(text[text.find("{"): text.rfind("}") + 1])
+        text = text[text.find("{"): text.rfind("}") + 1]
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError as ex:
+            print(f"  ! {etiket} json: {ex}")
+            return salvage(text) if kurtar else None
     except Exception as ex:
         print(f"  ! {etiket}: {ex}")
         return None
@@ -195,11 +213,12 @@ def translate(items):
         f"Aşağıda numaralı {len(items)} haber başlığı var: {len(tr)} tanesi Türkçe bölümünde, "
         f"{len(en)} tanesi İngilizce bölümünde. Her başlığı kendi bölümünün yönüne göre çevir.\n"
         "Haber başlığı üslubunu koru, kısa tut, özel isimleri ve skorları aynen bırak.\n"
+        "Çeviri metninde çift tırnak (\") KULLANMA, gerekiyorsa tek tırnak kullan.\n"
         f'Sadece şu JSON\'u döndür, açıklama yazma: {{"1": "çeviri", "2": "çeviri", ...}}\n'
         f"{len(items)} numaranın HEPSİ cevapta olmalı, hiçbirini atlama.\n\n"
         + "\n\n".join(parts)
     )
-    out = ask(prompt, 8000, "ceviri")
+    out = ask(prompt, 8000, "ceviri", kurtar=True)
     if not out:
         return
     n = 0
