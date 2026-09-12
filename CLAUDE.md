@@ -34,7 +34,7 @@ Kişisel haber özet sitesi. Tek kullanıcı (Şerif), Türkçe arayüz, public'
 - Jinja'da `c.items` dict metoduyla çakıştığı için haber listesi `c.news` anahtarında.
 
 ## Kategoriler (sources.yaml sırası)
-ai, ekonomi, afet, dunya, teknoloji, yorum (bilim insanları/öne çıkan isimlerin blog-Substack akışları),
+ai, ekonomi, afet, dunya, teknoloji, yorum (bilim insanları/öne çıkan isimlerin blog-Substack akışları), sinema,
 f1, ligler, turkiye, voleybol
 
 ## Lokal çalıştırma (Windows cmd)

@@ -64,6 +64,17 @@ categories:
       - https://marginalrevolution.com/feed
       - https://www.lesswrong.com/feed.xml?view=curated-rss
 
+  - key: sinema
+    title: Sinema
+    title_en: Movies
+    feeds:
+      - https://variety.com/v/film/feed/
+      - https://www.hollywoodreporter.com/c/movies/feed/
+      - https://deadline.com/v/film/feed/
+      - https://www.indiewire.com/c/film/feed/
+      - https://www.beyazperde.com/rss/haberler.xml
+      - https://news.google.com/rss/search?q=Hollywood+OR+sinema+vizyon+OR+gişe&hl=tr&gl=TR&ceid=TR:tr
+
   - key: f1
     title: Formula 1
     title_en: Formula 1
