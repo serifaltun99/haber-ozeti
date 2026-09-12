@@ -6,10 +6,9 @@ Kişisel haber özet sitesi. Tek kullanıcı (Şerif), Türkçe arayüz, public'
 - `build.py`: `sources.yaml`'daki RSS akışlarını paralel çeker (son 24 saat, kategori başına 12 haber,
   başlık bazlı tekilleştirme), tek bir Claude isteğiyle kategori başına 2 cümle Türkçe özet + en önemli 3
   haberi seçtirir, `template.html` (Jinja2) ile `public/index.html` üretir.
-- `.github/workflows/build.yml`: 6 saatte bir (UTC 0/6/12/18) çalışır, `public/`'i Cloudflare Pages'e
-  `wrangler pages deploy` ile yükler. Proje adı: `haber-ozeti`. Secrets: `ANTHROPIC_API_KEY`,
-  `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
-- Repo private. `public/` gitignore'da (deploy edilir, commit edilmez).
+- `.github/workflows/build.yml`: 6 saatte bir (UTC 0/6/12/18) çalışır, `public/`'i GitHub Pages'e
+  yükler (`upload-pages-artifact` + `deploy-pages`). Secret: `ANTHROPIC_API_KEY`.
+- Repo public (GitHub Pages ücretsiz planı gerektiriyor). `public/` gitignore'da.
 
 ## Kararlar
 - Token maliyeti öncelikli: API'ye yalnızca başlık gönderilir, tek istek, JSON çıktı, `max_tokens=1800`,
@@ -32,10 +31,11 @@ f1, ligler, turkiye, voleybol
 Logda `!` ile başlayan satır = erişilemeyen kaynak; sources.yaml'dan çıkar.
 
 ## Canlı kurulum (2026-09-12 itibarıyla tamam)
-- Repo: https://github.com/serifaltun99/haber-ozeti (private), adres: https://haber-ozeti.pages.dev
-- Cloudflare Pages projesi `haber-ozeti` (direct upload; git bağlı DEĞİL, deploy'u Actions yapar).
-  Yeni Cloudflare panelinde Pages sekmesi yok; proje `wrangler pages project create` ile açıldı.
-- Üç secret da GitHub'da tanımlı. Anthropic hesabında kredi var.
+- Repo: https://github.com/serifaltun99/haber-ozeti (public)
+- Adres: https://serifaltun99.github.io/haber-ozeti/
+- Cloudflare Pages DENENDİ VE BIRAKILDI: `*.pages.dev` Türkiye'den TLS/SNI seviyesinde engelli
+  (DNS küresel olarak çözülüyor, bağlantı kapatılıyor; mobil veride de aynı). DNS değiştirmek
+  çözmüyor. Kendi alan adı alınırsa Cloudflare tekrar kullanılabilir.
 - CI notu: Substack akışlarının bir kısmı (importai, garymarcus, thezvi) GitHub runner IP'lerinden
   403 veriyor; tarayıcı UA'sı çözmüyor. Substack dışı bloglar tercih edilmeli.
 

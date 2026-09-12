@@ -2,7 +2,9 @@
 
 RSS kaynaklarından son 24 saatin haberlerini toplar, Claude Haiku ile kategori başına
 kısa bir Türkçe özet yazdırır, tek sayfalık statik HTML üretir. 6 saatte bir GitHub Actions
-üzerinde çalışır, Cloudflare Pages'e yüklenir.
+üzerinde çalışır, GitHub Pages'e yüklenir.
+
+Adres: https://serifaltun99.github.io/haber-ozeti/
 
 ## Token maliyeti
 
@@ -20,17 +22,13 @@ kısa bir Türkçe özet yazdırır, tek sayfalık statik HTML üretir. 6 saatte
 
 ## Kurulum (bir kere)
 
-1. Repo'yu GitHub'a private olarak at.
-2. Cloudflare Dashboard → Workers & Pages → Create → Pages → **Direct Upload**,
-   proje adı `haber-ozeti` (workflow'daki `--project-name` ile aynı olmalı).
-3. Cloudflare → My Profile → API Tokens → Create Token → şablon **Edit Cloudflare Workers**
-   (Pages yazma yetkisi içerir). Account ID'yi Pages sayfasının sağ tarafından al.
-4. GitHub repo → Settings → Secrets and variables → Actions:
-   `ANTHROPIC_API_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`
-5. Actions sekmesinden `build` → Run workflow. Adres: `https://haber-ozeti.pages.dev`
+1. Repo public olmalı (GitHub Pages ücretsiz planda public repo ister).
+2. Settings → Pages → Source: **GitHub Actions**.
+3. Settings → Secrets and variables → Actions: `ANTHROPIC_API_KEY`.
+4. Actions sekmesinden `build` → Run workflow.
 
-Sayfayı kilitlemek istersen: Cloudflare → Zero Trust → Access → Applications → Add,
-domain `haber-ozeti.pages.dev`, policy: e-posta OTP. Ücretsiz.
+Not: Cloudflare Pages ile de denendi, ancak `*.pages.dev` Türkiye'den TLS seviyesinde
+engellendiği için vazgeçildi. Kendi alan adını bağlarsan Cloudflare tekrar seçenek olur.
 
 ## Ayarlar (ortam değişkeni)
 
