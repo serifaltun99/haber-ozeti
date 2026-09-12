@@ -4,19 +4,25 @@ Kişisel haber özet sitesi. Tek kullanıcı (Şerif), Türkçe arayüz, public'
 
 ## Mimari
 - `build.py`: `sources.yaml`'daki RSS akışlarını paralel çeker (son 24 saat, kategori başına 12 haber,
-  başlık bazlı tekilleştirme), tek bir Claude isteğiyle kategori başına 2 cümle Türkçe özet + en önemli 3
-  haberi seçtirir, `template.html` (Jinja2) ile `public/index.html` üretir.
+  başlık bazlı tekilleştirme), İKİ Claude isteği atar — (1) kategori başına TR+EN özet ve en önemli 3
+  haber, (2) her başlığın diğer dildeki karşılığı — `template.html` (Jinja2) ile `public/index.html`
+  üretir. Haberlerin dili `guess_lang()` ile bulunur (tr kaynak/karakter/kelime → tr, yoksa en).
 - `.github/workflows/build.yml`: 6 saatte bir (UTC 0/6/12/18) çalışır, `public/`'i GitHub Pages'e
   yükler (`upload-pages-artifact` + `deploy-pages`). Secret: `ANTHROPIC_API_KEY`.
 - Repo public (GitHub Pages ücretsiz planı gerektiriyor). `public/` gitignore'da.
 
 ## Kararlar
-- Token maliyeti öncelikli: API'ye yalnızca başlık gönderilir, tek istek, JSON çıktı, `max_tokens=1800`,
-  model `claude-haiku-4-5-20251001`. `USE_AI=0` ile API tamamen kapatılabilir.
+- Token maliyeti öncelikli: API'ye yalnızca başlık gönderilir, iki istek (özet 3000 + çeviri 8000
+  token), model `claude-haiku-4-5-20251001`. Çalışma ~0,03 $, ayda ~3 $. `USE_AI=0` API'yi kapatır.
+- Çeviri ve özet AYRI isteklerde: tek istekte model İngilizce başlıkları çevirmeden atlıyordu (35/116).
+- Model çeviri metninde kaçırılmamış çift tırnak kullanıp JSON'u bozabiliyor; `salvage()` bozuk
+  çıktıdan çiftleri kurtarır. Çeviri yoksa başlık kendi dilinde gösterilir (template'te fallback).
 - Arayüz haber sitesi görünümünde (BBC benzeri): siyah üst bant + kırmızı vurgu, yapışkan kategori
   şeridi (alt çizgili aktif sekme), "Öne çıkan" haberler kart ızgarasında, gerisi liste. Koyu tema
   `prefers-color-scheme` ile. Dış font/CSS/JS bağımlılığı YOK, her şey template.html içinde.
-- Kategori seçimi `localStorage`'da tutulur. URL'e `#kategori` YAZILMAZ: tarayıcı o bölüme atlayıp
+- Sayfa iki dilli: her metin `<span data-l="tr">`/`<span data-l="en">` çiftiyle gömülür, `<html
+  data-lang>` hangisinin görüneceğini belirler. Kategorilerin İngilizce adı `sources.yaml`'da
+  `title_en`. Dil ve kategori seçimi `localStorage`'da tutulur. URL'e `#kategori` YAZILMAZ: tarayıcı o bölüme atlayıp
   sayfayı ~140px kaydırıyor ve üst bant görünmüyordu. Gelen `#kategori` linki okunur, sonra
   `load`'da `scrollTo(0,0)` ile üste dönülür.
 - Federasyon siteleri RSS vermediği için voleybol ve Türkiye takımları Google News RSS ile:

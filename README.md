@@ -9,9 +9,16 @@ Adres: https://serifaltun99.github.io/haber-ozeti/
 ## Token maliyeti
 
 - Sadece başlıklar gönderilir (makale gövdesi yok), kategori başına en fazla 12 başlık.
-- Tek istek, JSON çıktı, `max_tokens=1800`. Çalışma başına ~2.800 giriş + ~1.000 çıkış token.
-- Haiku 4.5 ile günde 4 çalışma ≈ 0,03 $ / gün (~1 $ / ay).
+- İki istek: (1) kategori özetleri TR+EN, (2) başlıkların diğer dildeki karşılığı.
+  Çalışma başına ~5.900 giriş + ~4.300 çıkış token.
+- Haiku 4.5 ile günde 4 çalışma ≈ 0,11 $ / gün (~3 $ / ay).
 - `USE_AI=0` ile API tamamen kapatılır; sayfa özetsiz üretilir.
+
+## Dil
+
+Sayfa iki dilli: sağ üstteki TR / EN düğmesi arayüzü ve başlıkları birlikte değiştirir.
+Her haberin dili kaynağından ve metninden tespit edilir, eksik dildeki karşılığı Claude ile
+çevrilir. Çeviri gelmezse başlık kendi dilinde gösterilir. Seçilen dil tarayıcıda saklanır.
 
 ## Lokal çalıştırma (Windows cmd)
 
